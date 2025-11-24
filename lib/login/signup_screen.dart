@@ -70,6 +70,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   children: [
                     // USERNAME
                     TextFormField(
+                      style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
                       decoration: const InputDecoration(labelText: 'Username'),
                       onSaved: (val) => _username = val!.trim(),
                       validator: (val) {
@@ -83,6 +86,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     // FIRST NAME
                     TextFormField(
+                      style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
                       decoration: const InputDecoration(labelText: 'First name'),
                       onSaved: (val) => _firstName = val!.trim(),
                       validator: (val) {
@@ -96,6 +102,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     // LAST NAME
                     TextFormField(
+                      style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
                       decoration: const InputDecoration(labelText: 'Last name'),
                       onSaved: (val) => _lastName = val!.trim(),
                       validator: (val) {
@@ -109,6 +118,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     // PASSWORD
                     TextFormField(
+                      style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
                       obscureText: !_showPassword,
                       decoration: InputDecoration(
                         labelText: 'Password',
@@ -140,6 +152,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     // CONFIRM PASSWORD
                     TextFormField(
+                      style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
                       obscureText: !_showPassword,
                       decoration: const InputDecoration(labelText: 'Confirm password'),
                       onSaved: (val) => _confirmPassword = val ?? '',

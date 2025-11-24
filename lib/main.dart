@@ -3,6 +3,7 @@ import 'package:schedsync_app/home/home_screen.dart';
 import 'package:schedsync_app/login/login_screen.dart';
 import 'package:schedsync_app/login/signup_screen.dart';
 import 'package:schedsync_app/model/base_app_user.dart';
+import 'package:horizontal_week_calendar/horizontal_week_calendar.dart';
 
 // SchedSync brand color 
 Color defaultColor = const Color(0xFF3A3A3A);
@@ -39,6 +40,8 @@ class _MyAppState extends State<MyApp> {
           _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     });
   }
+
+  
 
   void _onLoginSuccess(BaseAppUser user) {
     setState(() {
@@ -111,10 +114,33 @@ class _MyAppState extends State<MyApp> {
           foregroundColor: Colors.black,
           elevation: 0,
         ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.black,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: const Color.fromARGB(151, 255, 255, 255)
+
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.black,
+          )
+        ),
+         textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+           foregroundColor: Colors.black,
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white70,
+            foregroundColor: Colors.black,
+          ),
+        ),
         inputDecorationTheme: const InputDecorationTheme(
           border: OutlineInputBorder(),
         ),
-        textTheme: const TextTheme(
+        textTheme: TextTheme(
+           bodyMedium: TextStyle(color: Colors.white),
           titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           titleMedium: TextStyle(fontSize: 14),
         ),
@@ -129,10 +155,33 @@ class _MyAppState extends State<MyApp> {
           foregroundColor: Colors.white,
           elevation: 0,
         ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.white,
+          selectedItemColor: Colors.black,
+          unselectedItemColor: const Color.fromARGB(165, 0, 0, 0)
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+           foregroundColor: Colors.white,
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white70,
+            foregroundColor: Colors.black,
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.white,
+          )
+        ),
         inputDecorationTheme: const InputDecorationTheme(
           border: OutlineInputBorder(),
+
         ),
-        textTheme: const TextTheme(
+        textTheme: TextTheme(
+          bodyMedium: TextStyle(color: Colors.white),
           titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           titleMedium: TextStyle(fontSize: 14),
         ),

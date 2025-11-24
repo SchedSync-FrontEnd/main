@@ -85,6 +85,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     // USERNAME
                     TextFormField(
+                      style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
                       decoration: const InputDecoration(
                         labelText: 'Username',
                       ),
@@ -100,6 +103,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     // PASSWORD
                     TextFormField(
+                      style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
                       obscureText: !_showPassword,
                       decoration: InputDecoration(
                         labelText: 'Password',
