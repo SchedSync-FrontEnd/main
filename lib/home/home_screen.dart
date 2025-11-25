@@ -1,9 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:schedsync_app/Profile/profile_screen.dart';
+import 'package:schedsync_app/class/class_screen.dart';
 import 'package:schedsync_app/model/base_app_user.dart';
 import 'package:intl/intl.dart';
+import 'package:schedsync_app/model/exam_model.dart';
+import 'package:schedsync_app/model/submission_model.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:schedsync_app/home/add_tab.dart';
+
+// Assuming the current user ID is 'u1' for testing the dashboard count
+const String UserId = 'u1'; 
+
+final List<ExamModel> allDummyExams = [
+  // Exam for the current user ('u1')
+  ExamModel(
+    examId: 'e1', userId: UserId, classId: 'c1', 
+    examTitle: 'Physics Exam', description: '', 
+    examDate: '2025-11-29', deadline: '2025-11-29', status: 'Pending',
+  ),
+  ExamModel(
+    examId: 'e2', userId: UserId, classId: 'c2', 
+    examTitle: 'History Final', description: '', 
+    examDate: '2025-12-10', deadline: '2025-12-10', status: 'Pending',
+  ),
+];
+
+final List<SubmissionModel> allDummySubmissions = [
+  // Submission for the current user
+  SubmissionModel(
+    submissionId: 's1', userId: UserId, classId: 'c1',
+    title: 'Kinematics Homework', description: '', 
+    submissionDate: '2025-11-28', deadline: '2025-11-28', status: 'Pending',
+  ),
+  SubmissionModel(
+    submissionId: 's2', userId: UserId, classId: 'c1',
+    title: 'Lab Report 1', description: '', 
+    submissionDate: '2025-11-30', deadline: '2025-11-30', status: 'Pending',
+  ),
+  SubmissionModel(
+    submissionId: 's3', userId: UserId, classId: 'c4',
+    title: 'Bio Project', description: '', 
+    submissionDate: '2025-12-01', deadline: '2025-12-01', status: 'Pending',
+  ),
+];
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen(
@@ -11,12 +51,12 @@ class HomeScreen extends StatefulWidget {
     super.key,
     required this.currentUser,
     required this.logout,
+
   });
 
   final void Function() switchTheme;
   final VoidCallback logout;
   final BaseAppUser currentUser;
-  //final calendarController = HorizontalCalendarController();
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -28,44 +68,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   var selectedDate = DateTime.now();
 
-  // CONFIRM LOGOUT
-  // Future<void> _confirmLogout(BuildContext context) async {
-  //   showDialog(
-  //     context: context,
-  //     builder: (ctx) => AlertDialog(
-  //       title: Text(
-  //         'Logout confirmation',
-  //         style: Theme.of(context).textTheme.titleMedium!.copyWith(
-  //               fontWeight: FontWeight.bold,
-  //             ),
-  //       ),
-  //       content: Text(
-  //         'Are you sure you want to logout?',
-  //         style: Theme.of(context).textTheme.titleMedium,
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(ctx),
-  //           child: const Text('Cancel'),
-  //         ),
-  //         TextButton(
-  //           onPressed: () async {
-  //             Navigator.pop(ctx);
-  //             await Future.delayed(const Duration(milliseconds: 300));
-  //             widget.logout();
-  //           },
-  //           child: const Text('Yes'),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   // Placeholder widgets for the nav bar pages
   final List<Widget> _pages = [
     const Center(child: Text("Dashboard Page")),
     const Center(child: Text("Add Schedule")),
-    const Center(child: Text("Classes Page")),
+    const ClassScreen(), 
   ];
 
   @override
@@ -126,9 +133,8 @@ class _HomeScreenState extends State<HomeScreen> {
       await showAddTabDialog(context);
       return;
     }
-
     setState(() => _selectedIndex = i); // Home (0) or Classes (2)
-  },
+  }, 
   items: const [
     BottomNavigationBarItem(
       icon: Icon(Icons.home_outlined),
@@ -151,6 +157,22 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHomeContent() {
     final textColor = Theme.of(context).colorScheme.onBackground;
 
+    // Filter exams/submissions relevant to the current user 
+    final userExams = allDummyExams
+        .where((e) => e.userId == widget.currentUser.userId)
+        .toList();
+
+    final userSubmissions = allDummySubmissions
+        .where((s) => s.userId == widget.currentUser.userId)
+        .toList();
+        
+    final examCount = userExams.length;
+    final submissionCount = userSubmissions.length;
+    
+    final examText = examCount == 1 ? 'Exam' : 'Exams';
+    final submissionText = submissionCount == 1 ? 'Submission' : 'Submissions';
+    
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -170,12 +192,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '1 Exam | 2 Submissions',
+            '${examCount} $examText | ${submissionCount} $submissionText',
             style: Theme.of(
               context,
             ).textTheme.titleMedium!.copyWith(color: textColor, fontSize: 18),
             textAlign: TextAlign.left,
           ),
+          // Text(
+          //   '1 Exam | 2 Submissions',
+          //   style: Theme.of(
+          //     context,
+          //   ).textTheme.titleMedium!.copyWith(color: textColor, fontSize: 18),
+          //   textAlign: TextAlign.left,
+          // ),
           // Text(
           //   'Welcome, ${widget.currentUser.firstName} ${widget.currentUser.lastName}!',
           //   style: Theme.of(context).textTheme.titleLarge!.copyWith(

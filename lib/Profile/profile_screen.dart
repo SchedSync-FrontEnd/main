@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schedsync_app/Profile/edit_profile_screen.dart';
 import 'package:schedsync_app/model/base_app_user.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -98,7 +99,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       // EMAIL
       Text(
-        widget.currentUser.username,
+        widget.currentUser.email,
         style: TextStyle(
           color: Theme.of(context).colorScheme.onBackground,
           fontSize: 18,
@@ -108,8 +109,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
       // EDIT BUTTON
       OutlinedButton.icon(
-        onPressed: () {
-          
+         onPressed: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => EditProfile(
+                currentUser: widget.currentUser, 
+                onProfileUpdated: (updatedUser) {
+                  // If ProfilePage relies solely on widget.currentUser, 
+                  // the main app state should be updated here.
+                },
+              ),
+            ),
+          );
         },
         icon: const Icon(Icons.edit, size: 16),
         label: const Text("Edit"),

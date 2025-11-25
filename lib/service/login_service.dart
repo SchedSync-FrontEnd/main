@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:schedsync_app/home/home_screen.dart';
 import 'package:schedsync_app/model/base_app_user.dart';
 
 // set  to `false` once kapag okay na yung API  
@@ -25,7 +26,8 @@ class LoginService {
         return null;
       }
       return BaseAppUser(
-        username: username,
+        userId: UserId,
+        email: username,
         password: password,
         firstName: 'Test',
         lastName: 'User',
