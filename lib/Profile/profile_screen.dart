@@ -20,7 +20,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  int _selectedIndex = 0;
 
 // CONFIRM LOGOUT
   Future<void> _confirmLogout(BuildContext context) async {
@@ -139,24 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
 ),
 
 
-    bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: 'Add',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt_outlined),
-            label: 'Classes',
-          ),
-        ],
-      ),
+   
 
    );
   }
