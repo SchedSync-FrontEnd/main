@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _loginService = LoginService();
 
-  String _username = '';
+  String _email = '';
   String _password = '';
   bool _showPassword = false;
   bool _isSending = false;
@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              //  LOGO
+              // LOGO
               Image.asset(
                 'assets/img/logo.png',
                 width: 320,
@@ -63,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 20),
 
+              // SUCCESS BOX from Registration
               if (widget.successfulRegistration)
                 Container(
                   width: double.infinity,
@@ -83,18 +84,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // USERNAME
+                    // EMAIL
                     TextFormField(
                       style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    ),
-                      decoration: const InputDecoration(
-                        labelText: 'Username',
+                        color: Theme.of(context).colorScheme.onBackground,
                       ),
-                      onSaved: (val) => _username = val!.trim(),
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                      ),
+                      onSaved: (val) => _email = val!.trim(),
                       validator: (val) {
                         if (val == null || val.trim().isEmpty) {
-                          return 'Please enter your username.';
+                          return 'Please enter your email.';
                         }
                         return null;
                       },
@@ -104,8 +105,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     // PASSWORD
                     TextFormField(
                       style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    ),
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
                       obscureText: !_showPassword,
                       decoration: InputDecoration(
                         labelText: 'Password',
@@ -176,8 +177,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final user = await _loginService.loginRequest(
       context: context,
-      username: _username,
-      password: _password,
+      email: _email,        // FIXED
+      password: _password,  // FIXED
     );
 
     setState(() {

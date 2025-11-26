@@ -1,0 +1,112 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+class ExamService {
+  static const String apiHost = "474qnu0tnc.execute-api.ap-southeast-2.amazonaws.com";
+  static const String stage = "test";
+
+  // Set to true if you want to use mock data during UI development
+  static const bool useFakeBackend = false;
+
+  /// Helper: Build the full API URI
+  Uri _buildUri(String path, {Map<String, String>? query}) {
+    return Uri.https(apiHost, '/$stage$path', query);
+  }
+
+  /// Helper: Show alert dialog for errors
+  void _showError(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Error"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // POST: Add Exam
+  Future<bool> addExam({
+    required BuildContext context,
+    required String userId,
+    required String title,
+    required String description,
+    required String examDate,
+    required String deadline,
+  }) async {
+    
+    if (useFakeBackend) {
+      await Future.delayed(const Duration(seconds: 1));
+      return true;
+    }
+
+    try {
+      final uri = _buildUri("/Exam");
+
+      final response = await http.post(
+        uri,
+        headers: {
+          "Content-Type": "application/json",
+          "user_id": userId,
+        },
+        body: jsonEncode({
+          "exam_title": title,
+          "description": description,
+          "exam_date": examDate,
+          "deadline": deadline,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        return true;
+      }
+
+      final body = jsonDecode(response.body);
+      _showError(context, body["error"] ?? "Something went wrong");
+      return false;
+
+    } catch (e) {
+      _showError(context, "Network error: $e");
+      return false;
+    }
+  }
+
+  // GET: Fetch Exams by user_id
+  Future<List<dynamic>> getExams(String userId, BuildContext context) async {
+    if (useFakeBackend) {
+      return [
+        {
+          "exam_title": "Mock Exam",
+          "description": "Test description",
+          "exam_date": "2025-01-01",
+          "deadline": "2025-01-01T10:00",
+          "status": "pending",
+        }
+      ];
+    }
+
+    try {
+      final uri = _buildUri("/Exam", query: {"user_id": userId});
+
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+
+      final error = jsonDecode(response.body);
+      _showError(context, error["error"] ?? "Unable to load exams");
+      return [];
+
+    } catch (e) {
+      _showError(context, "Network error: $e");
+      return [];
+    }
+  }
+}

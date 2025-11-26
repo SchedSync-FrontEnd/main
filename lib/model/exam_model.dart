@@ -1,18 +1,17 @@
 class ExamModel {
-  // Fields based on the 'Exams' table in the ERD [1, 2]
-  final String examId;        // exam_id (varchar) [1, 2]
-  final String userId;        // user_id (varchar) [1, 2]
-  final String classId;       // FK linking back to Classes table
-  final String examTitle;     // exam_title (varchar) [1, 2]
-  final String description;   // description (text) [1, 2]
-  final String examDate;      // exam_date (datetime) [1, 2]
-  final String deadline;      // deadline (datetime) [1, 2]
-  final String status;        // status (varchar) [1, 2]
+  final String examId;
+  final String userId;
+  final String classId;   // REQUIRED
+  final String examTitle;
+  final String description;
+  final String examDate;
+  final String deadline;
+  final String status;
 
   ExamModel({
     required this.examId,
     required this.userId,
-    required this.classId, 
+    required this.classId,     // REQUIRED
     required this.examTitle,
     required this.description,
     required this.examDate,
@@ -20,25 +19,24 @@ class ExamModel {
     required this.status,
   });
 
-  // Factory constructor for creating an instance from a JSON map
-  factory ExamModel.fromJson(Map json) {
+  factory ExamModel.fromJson(Map<String, dynamic> json) {
     return ExamModel(
-      examId: json['exam_id'] as String,
-      userId: json['user_id'] as String,
-      classId: json['class_id'] as String,
-      examTitle: json['exam_title'] as String,
-      description: json['description'] as String,
-      examDate: json['exam_date'] as String,
-      deadline: json['deadline'] as String,
-      status: json['status'] as String,
+      examId: json['exam_id'] ?? '',
+      userId: json['user_id'] ?? '',
+      classId: json['class_id'] ?? '',   // REQUIRED
+      examTitle: json['exam_title'] ?? '',
+      description: json['description'] ?? '',
+      examDate: json['exam_date'] ?? '',
+      deadline: json['deadline'] ?? '',
+      status: json['status'] ?? '',
     );
   }
 
-  // Method to convert the model back to JSON
-  Map toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'exam_id': examId,
       'user_id': userId,
+      'class_id': classId,  // REQUIRED
       'exam_title': examTitle,
       'description': description,
       'exam_date': examDate,

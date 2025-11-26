@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-
+import 'package:schedsync_app/model/base_app_user.dart'; 
 import 'add_class.dart';
 import 'add_submissions.dart';
 import 'add_exams.dart';
 
-Future<void> showAddTabDialog(BuildContext context) async {
+Future<void> showAddTabDialog(
+  BuildContext context,
+  BaseAppUser currentUser,
+) async {
   await showDialog(
     context: context,
     barrierDismissible: true,
@@ -34,26 +37,30 @@ Future<void> showAddTabDialog(BuildContext context) async {
                 ListTile(
                   title: const Text('Class Schedule'),
                   onTap: () {
-                    Navigator.pop(ctx);          
-                    showAddClassSheet(context);  
+                    Navigator.pop(ctx);
+                    showAddClassSheet(
+                      context: context,
+                      currentUser: currentUser,
+                    );
                   },
                 ),
-                const Divider(height: 0),
 
                 ListTile(
                   title: const Text('Submission'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    showAddSubmissionSheet(context);
+                    showAddSubmissionSheet(
+                      context: context,
+                      currentUser: currentUser,
+                    );
                   },
                 ),
-                const Divider(height: 0),
 
                 ListTile(
                   title: const Text('Exam'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    showAddExamSheet(context);
+                    showAddExamSheet(context, currentUser);
                   },
                 ),
 
@@ -64,10 +71,6 @@ Future<void> showAddTabDialog(BuildContext context) async {
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.black,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 8,
-                    ),
                   ),
                   child: const Text('Back'),
                 ),

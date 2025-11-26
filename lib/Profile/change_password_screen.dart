@@ -8,7 +8,7 @@ class ChangePasswordScreen extends StatefulWidget {
     required this.currentUser,
   });
 
-  final BaseAppUser currentUser; 
+  final BaseAppUser currentUser;
 
   @override
   State createState() => _ChangePasswordScreenState();
@@ -16,146 +16,77 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _userService = UserService();
-  final _formKey = GlobalKey<FormState>(); 
+  final _formKey = GlobalKey<FormState>();
 
   String _oldPassword = '';
   String _newPassword = '';
   String _confirmPassword = '';
-  bool _isSending = false; 
-  bool _showOldPassword = false;
-  bool _showNewPassword = false;
-  bool _showConfirmPassword = false;
 
-  void _submitPasswordChange() async { 
+  bool _sending = false;
 
-    if (_formKey.currentState!.validate()) { 
-      _formKey.currentState!.save(); 
+  void _submit() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      if (_newPassword != _confirmPassword) {
-        return;
-      }
+    _formKey.currentState!.save();
 
-      setState(() { 
-        _isSending = true; 
-      });
+    if (_newPassword != _confirmPassword) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Passwords do not match.")));
+      return;
+    }
 
-      final successMessage = await _userService.changePasswordRequest(
-        context: context,
-        uuid: widget.currentUser.uuid, 
-        oldPassword: _oldPassword,
-        newPassword: _newPassword,
-      );
+    setState(() => _sending = true);
 
-      if (mounted) {
-        setState(() {
-          _isSending = false;
-        });
-        
-        if (successMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(successMessage)),
-          );
-          Navigator.of(context).pop(); 
-        }
-      }
+    final msg = await _userService.changePasswordRequest(
+      context: context,
+      userId: widget.currentUser.userId,
+      oldPassword: _oldPassword,
+      newPassword: _newPassword,
+    );
+
+    setState(() => _sending = false);
+
+    if (msg != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      Navigator.pop(context);
     }
   }
 
   @override
-  Widget build(BuildContext context) { 
-    return Scaffold( 
-      appBar: AppBar( 
-        title: const Text('Change Password'), 
-      ),
-      body: Padding( 
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Change Password (Test Mode)")),
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Form( 
-          key: _formKey, 
+        child: Form(
+          key: _formKey,
           child: Column(
             children: [
-              // OLD PASSWORD FIELD
               TextFormField(
-                style: Theme.of(context).textTheme.titleMedium,
-                obscureText: !_showOldPassword, 
-                decoration: InputDecoration(
-                  label: const Text('Old Password'),
-                  suffixIcon: IconButton(
-                    onPressed: () { setState(() => _showOldPassword = !_showOldPassword); },
-                    icon: Icon(_showOldPassword ? Icons.visibility_off : Icons.visibility), 
-                  ),
-                ),
-                validator: (value) { 
-                  if (value == null || value.isEmpty) { return 'Please enter your current password.'; }
-                  return null;
-                },
-                enabled: !_isSending,
-                onSaved: (value) => _oldPassword = value!,
+                decoration: const InputDecoration(labelText: "Old Password"),
+                validator: (v) => v!.isEmpty ? "Enter old password" : null,
+                onSaved: (v) => _oldPassword = v!,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
-              // NEW PASSWORD FIELD
               TextFormField(
-                style: Theme.of(context).textTheme.titleMedium,
-                obscureText: !_showNewPassword,
-                decoration: InputDecoration(
-                  label: const Text('New Password'),
-                  suffixIcon: IconButton(
-                    onPressed: () { setState(() => _showNewPassword = !_showNewPassword); },
-                    icon: Icon(_showNewPassword ? Icons.visibility_off : Icons.visibility),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.length < 6) { return 'Password must be at least 6 characters.'; }
-                  _newPassword = value;
-                  return null;
-                },
-                enabled: !_isSending,
-                onSaved: (value) => _newPassword = value!,
+                decoration: const InputDecoration(labelText: "New Password"),
+                validator: (v) => v!.length < 6 ? "Min 6 characters" : null,
+                onSaved: (v) => _newPassword = v!,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
-              // CONFIRM NEW PASSWORD FIELD
               TextFormField(
-                style: Theme.of(context).textTheme.titleMedium,
-                obscureText: !_showConfirmPassword,
-                decoration: InputDecoration(
-                  label: const Text('Confirm New Password'),
-                  suffixIcon: IconButton(
-                    onPressed: () { setState(() => _showConfirmPassword = !_showConfirmPassword); },
-                    icon: Icon(_showConfirmPassword ? Icons.visibility_off : Icons.visibility),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) { return 'Please confirm your new password.'; }
-                  if (value != _newPassword) { return 'Passwords do not match.'; }
-                  return null;
-                },
-                enabled: !_isSending,
-                onSaved: (value) => _confirmPassword = value!,
+                decoration: const InputDecoration(labelText: "Confirm Password"),
+                validator: (v) => v!.isEmpty ? "Confirm password" : null,
+                onSaved: (v) => _confirmPassword = v!,
               ),
               const SizedBox(height: 24),
-              
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end, 
-                children: [ 
-                  TextButton( 
-                    onPressed: _isSending ? null : () { 
-                      _formKey.currentState!.reset(); 
-                    },
-                    child: const Text('Reset'), 
-                  ), 
-                  ElevatedButton( 
-                    onPressed: _isSending ? null : _submitPasswordChange, 
-                    child: _isSending 
-                      ? const SizedBox( 
-                          height: 16, 
-                          width: 16, 
-                          child: CircularProgressIndicator(strokeWidth: 2), 
-                        )
-                      : const Text('Change Password'), 
-                  ),
-                ],
+
+              ElevatedButton(
+                onPressed: _sending ? null : _submit,
+                child:
+                    _sending ? const CircularProgressIndicator() : const Text("Save"),
               ),
             ],
           ),

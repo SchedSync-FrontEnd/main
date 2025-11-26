@@ -14,16 +14,27 @@ final ClassModel sampleClass = ClassModel(
 
 final List<ExamModel> dummyExams = [
   ExamModel(
-    examId: 'e1', userId: 'u1', classId: 'c2', 
-    examTitle: 'Midterm Exam', description: 'Covers Chapters 1-5', 
-    examDate: '11/15/2025', deadline: '11/15/2025', status: 'Pending',
+    examId: 'e1',
+    userId: 'u1',
+    classId: 'c1',
+    examTitle: 'Midterm Exam',
+    description: 'Chapters 1–4',
+    examDate: '11/20/2025',
+    deadline: '11/20/2025',
+    status: 'Pending',
   ),
-   ExamModel(
-    examId: 'e1', userId: 'u1', classId: 'c2', 
-    examTitle: 'Midterm Exam', description: 'Covers Chapters 1-5', 
-    examDate: '11/15/2025', deadline: '11/15/2025', status: 'Pending',
+  ExamModel(
+    examId: 'e2',
+    userId: 'u1',
+    classId: 'c1',
+    examTitle: 'Final Exam',
+    description: 'All Topics',
+    examDate: '12/10/2025',
+    deadline: '12/10/2025',
+    status: 'Pending',
   ),
 ];
+
 
 final List<SubmissionModel> dummySubmissions = [
   SubmissionModel(

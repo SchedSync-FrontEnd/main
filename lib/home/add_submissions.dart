@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:schedsync_app/model/base_app_user.dart';
 
-Future<void> showAddSubmissionSheet(BuildContext context) async {
+Future<void> showAddSubmissionSheet({
+  required BuildContext context,
+  required BaseAppUser currentUser,
+}) async {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
 
   DateTime? selectedDate;
   TimeOfDay? selectedDeadline;
+
+  // NEW CONTROLLERS TO DISPLAY SELECTED VALUES
+  final dateController = TextEditingController();
+  final timeController = TextEditingController();
+
   String status = "pending"; // default
 
   await showModalBottomSheet(
@@ -18,28 +27,61 @@ Future<void> showAddSubmissionSheet(BuildContext context) async {
     builder: (ctx) {
       return StatefulBuilder(
         builder: (ctx, setState) {
+          // PICK DATE
           Future<void> pickDate() async {
+            final now = DateTime.now();
             final picked = await showDatePicker(
               context: ctx,
               initialDate: DateTime.now(),
-              firstDate: DateTime(2020),
+              firstDate: DateTime(now.year, now.month, now.day),
               lastDate: DateTime(2100),
             );
             if (picked != null) {
               setState(() {
                 selectedDate = picked;
+                dateController.text = DateFormat('yyyy-MM-dd').format(picked);
               });
             }
           }
 
+          // PICK TIME + VALIDATION
           Future<void> pickDeadline() async {
             final picked = await showTimePicker(
               context: ctx,
               initialTime: const TimeOfDay(hour: 9, minute: 0),
             );
+
             if (picked != null) {
+              // Convert selected time to minutes
+              final pickedMinutes = picked.hour * 60 + picked.minute;
+
+              // Get current time
+              final now = DateTime.now();
+              final currentMinutes = now.hour * 60 + now.minute;
+
+              // Condition: Only validate if selected date is TODAY
+              if (selectedDate != null) {
+                final isToday =
+                    selectedDate!.year == now.year &&
+                    selectedDate!.month == now.month &&
+                    selectedDate!.day == now.day;
+
+                if (isToday && pickedMinutes <= currentMinutes) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        "Deadline cannot be earlier than the current time.",
+                      ),
+                    ),
+                  );
+                  return;
+                }
+              }
+
+              // VALID → Update
               setState(() {
                 selectedDeadline = picked;
+                timeController.text = picked.format(ctx);
               });
             }
           }
@@ -55,7 +97,7 @@ Future<void> showAddSubmissionSheet(BuildContext context) async {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // drag handle
+                  // DRAG HANDLE
                   Container(
                     width: 40,
                     height: 4,
@@ -67,16 +109,14 @@ Future<void> showAddSubmissionSheet(BuildContext context) async {
                   ),
                   const SizedBox(height: 8),
 
-                  // Title (required)
+                  // Title
                   TextField(
                     controller: titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Title *',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Title *'),
                   ),
                   const SizedBox(height: 12),
 
-                  // Description (optional)
+                  // Description
                   TextField(
                     controller: descriptionController,
                     maxLines: 2,
@@ -86,46 +126,39 @@ Future<void> showAddSubmissionSheet(BuildContext context) async {
                   ),
                   const SizedBox(height: 12),
 
-                  // Submission Date (required)
+                  // Submission Date (FIXED)
                   GestureDetector(
                     onTap: pickDate,
                     child: AbsorbPointer(
                       child: TextField(
-                        decoration: InputDecoration(
+                        controller: dateController,
+                        decoration: const InputDecoration(
                           labelText: 'Submission Date *',
-                          hintText: selectedDate == null
-                              ? 'Choose date'
-                              : DateFormat('yyyy-MM-dd')
-                                  .format(selectedDate!),
-                          suffixIcon:
-                              const Icon(Icons.calendar_today),
+                          suffixIcon: Icon(Icons.calendar_today),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
 
-                  // Deadline Time 
+                  // Deadline Time (FIXED)
                   GestureDetector(
                     onTap: pickDeadline,
                     child: AbsorbPointer(
                       child: TextField(
-                        decoration: InputDecoration(
+                        controller: timeController,
+                        decoration: const InputDecoration(
                           labelText: 'Deadline Time *',
-                          hintText: selectedDeadline == null
-                              ? 'Choose time'
-                              : selectedDeadline!.format(context),
-                          suffixIcon: const Icon(Icons.access_time),
+                          suffixIcon: Icon(Icons.access_time),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
 
-                  // Status
+                  // Status Switch
                   Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text("Mark as done"),
                       Switch(
@@ -145,21 +178,33 @@ Future<void> showAddSubmissionSheet(BuildContext context) async {
                     alignment: Alignment.bottomRight,
                     child: ElevatedButton(
                       onPressed: () {
-                        if (titleController.text.isEmpty ||
-                            selectedDate == null ||
-                            selectedDeadline == null) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(
+                        // VALIDATION
+                        if (titleController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Title is required.")),
+                          );
+                          return;
+                        }
+
+                        if (dateController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text(
-                                "Please complete all required fields.",
-                              ),
+                              content: Text("Submission date is required."),
                             ),
                           );
                           return;
                         }
 
-                        // TODO: create Submission model instance here
+                        if (timeController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Deadline time is required."),
+                            ),
+                          );
+                          return;
+                        }
+
+                        // TODO: Create Submission model here
 
                         Navigator.pop(ctx);
                       },

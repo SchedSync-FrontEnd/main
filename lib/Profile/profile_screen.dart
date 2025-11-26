@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:schedsync_app/Profile/edit_profile_screen.dart';
 import 'package:schedsync_app/model/base_app_user.dart';
+import 'package:schedsync_app/Profile/edit_profile_screen.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends StatelessWidget {
   const ProfilePage(
     this.switchTheme, {
     super.key,
@@ -12,41 +12,25 @@ class ProfilePage extends StatefulWidget {
   });
 
   final void Function() switchTheme;
-  final  VoidCallback goToHome;
+  final VoidCallback goToHome;
   final VoidCallback logout;
   final BaseAppUser currentUser;
 
-  @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> {
-
-// CONFIRM LOGOUT
   Future<void> _confirmLogout(BuildContext context) async {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(
-          'Logout confirmation',
-          style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        content: Text(
-          'Are you sure you want to logout?',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        title: const Text('Logout confirmation'),
+        content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(ctx);
-              await Future.delayed(const Duration(milliseconds: 300));
-              widget.logout();
+              logout();
               Navigator.of(context).popUntil((route) => route.isFirst);
             },
             child: const Text('Yes'),
@@ -56,101 +40,78 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  
-@override
+  @override
   Widget build(BuildContext context) {
-   return Scaffold(
-    appBar: AppBar(
-      title: const Text('Profile'),
+    final color = Theme.of(context).colorScheme.onBackground;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Profile"),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            widget.goToHome();
+            goToHome();
             Navigator.pop(context);
-            }
+          },
         ),
         actions: [
           IconButton(
-            onPressed: widget.switchTheme,
+            onPressed: switchTheme,
             icon: const Icon(Icons.brightness_6),
           ),
         ],
-    ),
-
-    body: Column(
-    children: [
-      // PROFILE ICON
-      const CircleAvatar(
-        backgroundColor: Colors.black,
-        radius: 50,
-        child: Icon(Icons.person, size: 80, color: Colors.white,),
-      ),
-      const SizedBox(height: 10),
-
-      // USER NAME
-      Text(
-        '${widget.currentUser.firstName} ${widget.currentUser.lastName}',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onBackground,
-          fontSize: 25,
-          fontWeight: FontWeight.bold,
-        ),
       ),
 
-      // EMAIL
-      Text(
-        widget.currentUser.email,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onBackground,
-          fontSize: 18,
-        ),
-      ),
-      const SizedBox(height: 15),
+      body: Column(
+        children: [
+          const SizedBox(height: 16),
 
-      // EDIT BUTTON
-      OutlinedButton.icon(
-         onPressed: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (ctx) => EditProfile(
-                currentUser: widget.currentUser, 
-                onProfileUpdated: (updatedUser) {
-                  // If ProfilePage relies solely on widget.currentUser, 
-                  // the main app state should be updated here.
-                },
-              ),
-            ),
-          );
-        },
-        icon: const Icon(Icons.edit, size: 16),
-        label: const Text("Edit"),
-        style: OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+          const CircleAvatar(
+            radius: 50,
+            backgroundColor: Colors.black,
+            child: Icon(Icons.person, size: 80, color: Colors.white),
           ),
-        ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            "${currentUser.firstName} ${currentUser.lastName}",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color),
+          ),
+
+          Text(
+            currentUser.email,
+            style: TextStyle(fontSize: 16, color: color),
+          ),
+
+          const SizedBox(height: 20),
+
+          OutlinedButton.icon(
+            icon: const Icon(Icons.edit, size: 16),
+            label: const Text("Edit"),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditProfile(
+                    currentUser: currentUser,
+                  ),
+                ),
+              );
+            },
+          ),
+
+          const Spacer(),
+
+          OutlinedButton.icon(
+            icon: const Icon(Icons.logout),
+            label: const Text("Logout"),
+            onPressed: () => _confirmLogout(context),
+          ),
+
+          const SizedBox(height: 20),
+        ],
       ),
-
-      const Spacer(),
-
-      // LOGOUT BUTTON
-      Align(
-        alignment: Alignment.bottomRight,
-        child: OutlinedButton.icon(
-          onPressed: () => _confirmLogout(context),
-          icon: const Icon(Icons.logout, size: 16),
-          label: const Text("Logout"),
-        ),
-      ),
-      const SizedBox(height: 10),
-
-    ],
-  
-),
-
-
-   
-
-   );
+    );
   }
 }

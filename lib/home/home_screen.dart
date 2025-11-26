@@ -1,49 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:schedsync_app/service/exam_service.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
+
 import 'package:schedsync_app/Profile/profile_screen.dart';
 import 'package:schedsync_app/class/class_screen.dart';
-import 'package:schedsync_app/model/base_app_user.dart';
-import 'package:intl/intl.dart';
-import 'package:schedsync_app/model/exam_model.dart';
-import 'package:schedsync_app/model/submission_model.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:schedsync_app/home/add_tab.dart';
-
-// Assuming the current user ID is 'u1' for testing the dashboard count
-const String UserId = 'u1'; 
-
-final List<ExamModel> allDummyExams = [
-  // Exam for the current user ('u1')
-  ExamModel(
-    examId: 'e1', userId: UserId, classId: 'c1', 
-    examTitle: 'Physics Exam', description: '', 
-    examDate: '2025-11-29', deadline: '2025-11-29', status: 'Pending',
-  ),
-  ExamModel(
-    examId: 'e2', userId: UserId, classId: 'c2', 
-    examTitle: 'History Final', description: '', 
-    examDate: '2025-12-10', deadline: '2025-12-10', status: 'Pending',
-  ),
-];
-
-final List<SubmissionModel> allDummySubmissions = [
-  // Submission for the current user
-  SubmissionModel(
-    submissionId: 's1', userId: UserId, classId: 'c1',
-    title: 'Kinematics Homework', description: '', 
-    submissionDate: '2025-11-28', deadline: '2025-11-28', status: 'Pending',
-  ),
-  SubmissionModel(
-    submissionId: 's2', userId: UserId, classId: 'c1',
-    title: 'Lab Report 1', description: '', 
-    submissionDate: '2025-11-30', deadline: '2025-11-30', status: 'Pending',
-  ),
-  SubmissionModel(
-    submissionId: 's3', userId: UserId, classId: 'c4',
-    title: 'Bio Project', description: '', 
-    submissionDate: '2025-12-01', deadline: '2025-12-01', status: 'Pending',
-  ),
-];
-
+import 'package:schedsync_app/model/base_app_user.dart';
+import 'package:schedsync_app/model/exam_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen(
@@ -51,7 +15,6 @@ class HomeScreen extends StatefulWidget {
     super.key,
     required this.currentUser,
     required this.logout,
-
   });
 
   final void Function() switchTheme;
@@ -63,17 +26,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-  
   int _selectedIndex = 0;
-  var selectedDate = DateTime.now();
 
-  // Placeholder widgets for the nav bar pages
-  final List<Widget> _pages = [
-    const Center(child: Text("Dashboard Page")),
-    const Center(child: Text("Add Schedule")),
-    const ClassScreen(), 
-  ];
+  List<ExamModel> exams = [];
+  bool isLoadingExams = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExams();
+  }
+
+  Future<void> _loadExams() async {
+    final service = ExamService();
+    final data = await service.getExams(widget.currentUser.userId, context);
+
+    setState(() {
+      exams = data.map((json) => ExamModel.fromJson(json)).toList();
+      isLoadingExams = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,31 +61,24 @@ class _HomeScreenState extends State<HomeScreen> {
               color: isDark ? Colors.white : null,
               colorBlendMode: BlendMode.srcIn,
             ),
-            Text(' SchedSync'),
+            const Text(' SchedSync'),
           ],
         ),
-        //const Text('SchedSync'),
         actions: [
           IconButton(
             onPressed: widget.switchTheme,
             icon: const Icon(Icons.brightness_6),
           ),
-          // IconButton(
-          //   onPressed: () => _confirmLogout(context),
-          //   icon: const Icon(Icons.logout),
-          // ),
           IconButton(
             onPressed: () {
-              Navigator.of(context).push(
+              Navigator.push(
+                context,
                 MaterialPageRoute(
                   builder: (_) => ProfilePage(
                     widget.switchTheme,
                     currentUser: widget.currentUser,
                     logout: widget.logout,
-                    goToHome: () {
-                      //setState(() { _selectedIndex = 0;
-                      //});
-                    },
+                    goToHome: () {},
                   ),
                 ),
               );
@@ -126,124 +91,180 @@ class _HomeScreenState extends State<HomeScreen> {
       body: _selectedIndex == 0 ? _buildHomeContent() : _pages[_selectedIndex],
 
       bottomNavigationBar: BottomNavigationBar(
-  currentIndex: _selectedIndex,
-  onTap: (i) async {
-    if (i == 1) {
-      // Add button: show the popup
-      await showAddTabDialog(context);
-      return;
-    }
-    setState(() => _selectedIndex = i); // Home (0) or Classes (2)
-  }, 
-  items: const [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.home_outlined),
-      label: 'Home',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.add_circle_outline),
-      label: 'Add',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.list_alt_outlined),
-      label: 'Classes',
-    ),
-  ],
-),
-
-    );
-  }
-
-  Widget _buildHomeContent() {
-    final textColor = Theme.of(context).colorScheme.onBackground;
-
-    // Filter exams/submissions relevant to the current user 
-    final userExams = allDummyExams
-        .where((e) => e.userId == widget.currentUser.userId)
-        .toList();
-
-    final userSubmissions = allDummySubmissions
-        .where((s) => s.userId == widget.currentUser.userId)
-        .toList();
-        
-    final examCount = userExams.length;
-    final submissionCount = userSubmissions.length;
-    
-    final examText = examCount == 1 ? 'Exam' : 'Exams';
-    final submissionText = submissionCount == 1 ? 'Submission' : 'Submissions';
-    
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'TODAY',
-            style: TextStyle(color: Colors.lightGreen, fontSize: 30),
-            textAlign: TextAlign.left,
-          ),
-          Text(
-            DateFormat('dd MMMM, yyyy').format(DateTime.now()),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium!.copyWith(color: textColor),
-            textAlign: TextAlign.left,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${examCount} $examText | ${submissionCount} $submissionText',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium!.copyWith(color: textColor, fontSize: 18),
-            textAlign: TextAlign.left,
-          ),
-          // Text(
-          //   '1 Exam | 2 Submissions',
-          //   style: Theme.of(
-          //     context,
-          //   ).textTheme.titleMedium!.copyWith(color: textColor, fontSize: 18),
-          //   textAlign: TextAlign.left,
-          // ),
-          // Text(
-          //   'Welcome, ${widget.currentUser.firstName} ${widget.currentUser.lastName}!',
-          //   style: Theme.of(context).textTheme.titleLarge!.copyWith(
-          //         color: textColor,
-          //       ),
-          //   textAlign: TextAlign.left,
-          // ),
-          // const SizedBox(height: 16),
-          // Text(
-          //   'Username: ${widget.currentUser.username}',
-          //   style: Theme.of(context).textTheme.titleMedium!.copyWith(
-          //         color: textColor,
-          //       ),
-          // ),
-          // const SizedBox(height: 8),
-          // Text(
-          //   'User ID: ${widget.currentUser.uuid}',
-          //   style: Theme.of(context).textTheme.titleMedium!.copyWith(
-          //         color: textColor,
-          //       ),
-          // ),
-          const SizedBox(height: 15),
-          Expanded(
-            child: SfCalendar(
-              view: CalendarView.week,
-              todayHighlightColor: Theme.of(context).colorScheme.onBackground,
-              showCurrentTimeIndicator: false,
-              headerHeight: 0,
-
-              timeSlotViewSettings: const TimeSlotViewSettings(
-                startHour: 6,
-                endHour: 22,
-                timeIntervalHeight: 70,
-                timeFormat: 'h:mm a',
-              ),
-            ),
-          ),
+        currentIndex: _selectedIndex,
+        onTap: (i) async {
+          if (i == 1) {
+            await showAddTabDialog(context, widget.currentUser);
+            return;
+          }
+          setState(() => _selectedIndex = i);
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: 'Add'),
+          BottomNavigationBarItem(icon: Icon(Icons.list_alt_outlined), label: 'Classes'),
         ],
       ),
     );
   }
+
+  // NEW IMPROVED HOME PAGE UI 
+
+Widget _buildHomeContent() {
+  final textColor = Theme.of(context).colorScheme.onBackground;
+
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // TODAY HEADER
+        Text(
+          'TODAY',
+          style: const TextStyle(
+            color: Colors.lightGreen,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        Text(
+          DateFormat('dd MMMM, yyyy').format(DateTime.now()),
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                color: textColor,
+              ),
+        ),
+
+        const SizedBox(height: 10),
+
+        // COUNTERS
+        Text(
+          "${exams.length} Exams",
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                color: textColor,
+                fontSize: 18,
+              ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // TOP: CALENDAR 
+        Expanded(
+          flex: 3,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: SfCalendar(
+              view: CalendarView.week,
+              todayHighlightColor: Theme.of(context).colorScheme.primary,
+              showCurrentTimeIndicator: true,
+              headerHeight: 0,
+              timeSlotViewSettings: const TimeSlotViewSettings(
+                startHour: 6,
+                endHour: 22,
+                timeIntervalHeight: 65,
+                timeFormat: 'h:mm a',
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // BOTTOM: SCROLLABLE EXAM LIST 
+        Expanded(
+          flex: 5,
+          child: isLoadingExams
+              ? const Center(child: CircularProgressIndicator())
+              : exams.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "No exams yet",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: exams.length,
+                      itemBuilder: (_, i) => _buildExamCard(exams[i]),
+                    ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+  //  EXAM CARD UI 
+
+Widget _buildExamCard(ExamModel exam) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+
+  Color statusColor = Colors.orange;
+  if (exam.status.toLowerCase() == "completed") statusColor = Colors.green;
+
+  return Container(
+    margin: const EdgeInsets.only(bottom: 12),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(12),
+      color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          exam.examTitle,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        const SizedBox(height: 4),
+
+        Text(
+          exam.description,
+          style: TextStyle(
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Date: ${exam.examDate}",
+              style: TextStyle(color: Colors.grey.shade500),
+            ),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                exam.status,
+                style: TextStyle(
+                  color: statusColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+
+  // Placeholder pages 
+  final List<Widget> _pages = [
+    Center(child: Text("Dashboard Page")),
+    Center(child: Text("Add Schedule")),
+    const ClassScreen(),
+  ];
 }

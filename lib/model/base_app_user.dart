@@ -3,58 +3,45 @@ import 'package:uuid/uuid.dart';
 const _uuid = Uuid();
 
 class BaseAppUser {
-  final String uuid;
-  final String userId;   
+  final String userId;
   final String email;
-  final String password;
   final String firstName;
   final String lastName;
-  final String createdDate;
+
+  // Store raw password only in local session (NOT saved to API)
+  final String password;
 
   BaseAppUser({
-     required this.userId,
+    required this.userId,
     required this.email,
-    required this.password,
     required this.firstName,
     required this.lastName,
-  })  : uuid = _uuid.v4(),
-        createdDate = DateTime.now().toIso8601String();
-
-  BaseAppUser.fromData({
-    required this.uuid,
-     required this.userId,
-    required this.email,
     required this.password,
-    required this.firstName,
-    required this.lastName,
-    required this.createdDate,
   });
 
-  factory BaseAppUser.fromJson(Map<String, dynamic> json) {
-    return BaseAppUser.fromData(
-      uuid: json['uuid'] ?? _uuid.v4(),
-      userId: json['user_id'] as String,
+  // Create object from API response (login)
+  factory BaseAppUser.fromJson(Map<String, dynamic> json, String rawPassword) {
+    return BaseAppUser(
+      userId: json['user_id'] ?? '',
       email: json['email'] ?? '',
-      password: json['password_hash'] ?? '',
       firstName: json['first_name'] ?? '',
       lastName: json['last_name'] ?? '',
-      createdDate: json['createdDate'] ??
-          DateTime.now().toIso8601String(),
+      password: rawPassword, // keep raw for session
     );
   }
 
+  // Convert to JSON (rarely used, but keep it clean)
   Map<String, dynamic> toJson() {
     return {
-      'uuid': uuid,
-      'user_Id': userId,
+      'user_id': userId,
       'email': email,
-      'password_hash': password,
       'first_name': firstName,
       'last_name': lastName,
-      'createdDate': createdDate,
+      // Do NOT include password in API outputs
     };
   }
 }
+
 
 // class BaseAppUser {
 //   final String userId;        

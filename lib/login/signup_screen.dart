@@ -21,7 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _loginService = LoginService();
 
-  String _username = '';
+  String _email = '';
   String _firstName = '';
   String _lastName = '';
   String _password = '';
@@ -53,14 +53,12 @@ class _SignupScreenState extends State<SignupScreen> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // LOGO
               Image.asset(
                 'assets/img/logo.png',
                 width: 260,
                 height: 260,
                 color: isDark ? Colors.white : null,
                 colorBlendMode: BlendMode.srcIn,
-                fit: BoxFit.contain,
               ),
               const SizedBox(height: 20),
 
@@ -68,16 +66,16 @@ class _SignupScreenState extends State<SignupScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // USERNAME
+                    // EMAIL
                     TextFormField(
-                      style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    ),
-                      decoration: const InputDecoration(labelText: 'Username'),
-                      onSaved: (val) => _username = val!.trim(),
+                      decoration: const InputDecoration(labelText: 'Email'),
+                      onSaved: (val) => _email = val!.trim(),
                       validator: (val) {
                         if (val == null || val.trim().isEmpty) {
-                          return 'Please enter a username.';
+                          return 'Please enter your email.';
+                        }
+                        if (!val.contains("@")) {
+                          return 'Enter a valid email address.';
                         }
                         return null;
                       },
@@ -86,10 +84,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     // FIRST NAME
                     TextFormField(
-                      style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    ),
-                      decoration: const InputDecoration(labelText: 'First name'),
+                      decoration: const InputDecoration(labelText: 'First Name'),
                       onSaved: (val) => _firstName = val!.trim(),
                       validator: (val) {
                         if (val == null || val.trim().isEmpty) {
@@ -102,10 +97,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     // LAST NAME
                     TextFormField(
-                      style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    ),
-                      decoration: const InputDecoration(labelText: 'Last name'),
+                      decoration: const InputDecoration(labelText: 'Last Name'),
                       onSaved: (val) => _lastName = val!.trim(),
                       validator: (val) {
                         if (val == null || val.trim().isEmpty) {
@@ -118,18 +110,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     // PASSWORD
                     TextFormField(
-                      style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    ),
                       obscureText: !_showPassword,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _showPassword = !_showPassword;
-                            });
-                          },
+                          onPressed: () =>
+                              setState(() => _showPassword = !_showPassword),
                           icon: Icon(
                             _showPassword
                                 ? Icons.visibility_off
@@ -152,25 +138,20 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     // CONFIRM PASSWORD
                     TextFormField(
-                      style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    ),
                       obscureText: !_showPassword,
-                      decoration: const InputDecoration(labelText: 'Confirm password'),
+                      decoration:
+                          const InputDecoration(labelText: 'Confirm Password'),
                       onSaved: (val) => _confirmPassword = val ?? '',
                       validator: (val) {
                         if (val == null || val.isEmpty) {
                           return 'Please confirm your password.';
                         }
-                        if (val != _password && _password.isNotEmpty) {
-                          return 'Passwords do not match.';
-                        }
                         return null;
                       },
                     ),
+
                     const SizedBox(height: 24),
 
-                    // BUTTONS
                     Row(
                       children: [
                         Expanded(
@@ -216,24 +197,20 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    setState(() {
-      _isSending = true;
-    });
+    setState(() => _isSending = true);
 
-    final msg = await _loginService.signUpRequest(
+    final success = await _loginService.signUpRequest(
       context: context,
-      username: _username,
+      email: _email,
       password: _password,
       firstName: _firstName,
       lastName: _lastName,
     );
 
-    setState(() {
-      _isSending = false;
-    });
+    setState(() => _isSending = false);
 
-    if (msg != null) {
-      widget.successRegister(msg);
+    if (success) {
+      widget.successRegister("Registration successful!");
     }
   }
 }
