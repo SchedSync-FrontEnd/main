@@ -16,7 +16,7 @@ final List<ClassModel> dummyClasses = [
     location: 'Rm 101',
   ),
   ClassModel(
-    classId: 'c2',
+   classId: 'c2',
     userId: 'u1',
     className: 'History',
     classCode: 'H202',

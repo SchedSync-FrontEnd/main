@@ -30,11 +30,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<ExamModel> exams = [];
   bool isLoadingExams = true;
+  
 
   @override
   void initState() {
     super.initState();
-    _loadExams();
+    // _pages = [
+    //         // Index 0: Dashboard (Handled by _buildHomeContent)
+    //         const Center(child: Text("Dashboard Page")), 
+            
+    //         // Index 1: Add Schedule (Placeholder; handled by showAddTabDialog in onTap)
+    //         // Note: If 'Add' is ONLY a modal, this page slot is unused in the body, 
+    //         // but we maintain the three-item list to match the three BottomNavigationBarItems.
+    //         const Center(child: Text("Add Schedule")), 
+            
+    //         // Index 2: Classes (FIXED: Passing currentUser)
+    //         ClassScreen(), 
+    //     ];
+
+        _loadExams(); 
   }
 
   Future<void> _loadExams() async {
@@ -94,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         onTap: (i) async {
           if (i == 1) {
-            await showAddTabDialog(context, widget.currentUser);
+            await showAddTabDialog(context);
             return;
           }
           setState(() => _selectedIndex = i);
@@ -263,8 +277,8 @@ Widget _buildExamCard(ExamModel exam) {
 
   // Placeholder pages 
   final List<Widget> _pages = [
-    Center(child: Text("Dashboard Page")),
-    Center(child: Text("Add Schedule")),
-    const ClassScreen(),
+    const Center(child: Text("Dashboard Page")),
+    const Center(child: Text("Add Schedule")),
+    ClassScreen(),
   ];
 }

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:schedsync_app/model/base_app_user.dart'; 
+
 import 'add_class.dart';
 import 'add_submissions.dart';
 import 'add_exams.dart';
 
-Future<void> showAddTabDialog(
-  BuildContext context,
-  BaseAppUser currentUser,
-) async {
+Future<void> showAddTabDialog(BuildContext context) async {
   await showDialog(
     context: context,
     barrierDismissible: true,
@@ -37,30 +34,26 @@ Future<void> showAddTabDialog(
                 ListTile(
                   title: const Text('Class Schedule'),
                   onTap: () {
-                    Navigator.pop(ctx);
-                    showAddClassSheet(
-                      context: context,
-                      currentUser: currentUser,
-                    );
+                    Navigator.pop(ctx);          
+                    showAddClassSheet(context);  
                   },
                 ),
+                const Divider(height: 0),
 
                 ListTile(
                   title: const Text('Submission'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    showAddSubmissionSheet(
-                      context: context,
-                      currentUser: currentUser,
-                    );
+                    showAddSubmissionSheet(context);
                   },
                 ),
+                const Divider(height: 0),
 
                 ListTile(
                   title: const Text('Exam'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    showAddExamSheet(context, currentUser);
+                    showAddExamSheet(context);
                   },
                 ),
 
@@ -71,6 +64,10 @@ Future<void> showAddTabDialog(
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.black,
                     foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 8,
+                    ),
                   ),
                   child: const Text('Back'),
                 ),

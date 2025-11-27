@@ -7,34 +7,24 @@ import 'package:schedsync_app/model/submission_model.dart';
 // A sample ClassModel definition for testing, matching the structure required
 // Note: In a real app, this data would come from the API via the ClassScreen.
 final ClassModel sampleClass = ClassModel(
-  classId: 'c1', userId: 'u1', className: 'Physics', classCode: 'APM1104',
+classId: 'c1', 
+  userId: 'u1', className: 'Physics', classCode: 'APM1104',
   daysOfWeek: ['Monday', 'Thursday'], timeStart: '9:30 am', timeEnd: '10:30 am',
   professor: 'Mr. Paul Delos Santos', location: 'ADB 305',
 );
 
 final List<ExamModel> dummyExams = [
   ExamModel(
-    examId: 'e1',
-    userId: 'u1',
-    classId: 'c1',
-    examTitle: 'Midterm Exam',
-    description: 'Chapters 1–4',
-    examDate: '11/20/2025',
-    deadline: '11/20/2025',
-    status: 'Pending',
+    examId: 'e1', userId: 'u1', classId: 'c2', 
+    examTitle: 'Midterm Exam', description: 'Covers Chapters 1-5', 
+    examDate: '11/15/2025', deadline: '11/15/2025', status: 'Pending',
   ),
-  ExamModel(
-    examId: 'e2',
-    userId: 'u1',
-    classId: 'c1',
-    examTitle: 'Final Exam',
-    description: 'All Topics',
-    examDate: '12/10/2025',
-    deadline: '12/10/2025',
-    status: 'Pending',
+   ExamModel(
+    examId: 'e1', userId: 'u1', classId: 'c2', 
+    examTitle: 'Midterm Exam', description: 'Covers Chapters 1-5', 
+    examDate: '11/15/2025', deadline: '11/15/2025', status: 'Pending',
   ),
 ];
-
 
 final List<SubmissionModel> dummySubmissions = [
   SubmissionModel(
