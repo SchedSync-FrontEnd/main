@@ -106,6 +106,36 @@ class ClassService {
     );
   }
 
+// GET CLASS
+static Future<List<ClassModel>> getUserClasses(String userId) async {
+  final uri = Uri.https(apiHost, "/$stage/Class");
+
+  final response = await http.get(
+    uri,
+    headers: {
+      "Content-Type": "application/json",
+      "user_id": userId,
+    },
+  );
+
+  print("HEADERS: ${response.request?.headers}");
+  print("Response body: ${response.body}");
+
+  // First decode API Gateway wrapper
+  final outer = jsonDecode(response.body);
+
+  // Then decode the "body" string
+  final inner = jsonDecode(outer["body"]);
+
+  // Actual data list
+  final List<dynamic> data = inner["data"] ?? [];
+
+  print("Fetched classes: $data");
+
+  return data.map((e) => ClassModel.fromJson(e)).toList();
+}
+
+
   // ADD CLASS
   Future<ClassModel?> addClass({
     required BuildContext context,

@@ -317,10 +317,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<ExamModel> exams = [];
   bool isLoadingExams = true;
+  late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
+
+   _pages = [
+    Center(child: Text("Dashboard Page")),
+    Center(child: Text("Add Schedule")),
+    ClassScreen(currentUser: widget.currentUser),
+  ];
+
     _loadExams();
   }
 
@@ -581,9 +589,9 @@ Widget _buildExamCard(ExamModel exam) {
 
 
   // Placeholder pages 
-  final List<Widget> _pages = [
-    Center(child: Text("Dashboard Page")),
-    Center(child: Text("Add Schedule")),
-    //const ClassScreen(),
-  ];
+  // final List<Widget> _pages = [
+  //   Center(child: Text("Dashboard Page")),
+  //   Center(child: Text("Add Schedule")),
+  //   ClassScreen(currentUser: widget.currentUser),
+  // ];
 }

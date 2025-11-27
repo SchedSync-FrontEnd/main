@@ -19,6 +19,11 @@ class ClassModel {
     this.location,
   });
 
+  String get schedule {
+    final days = daysOfWeek.join(" | ");
+    return "$days • $timeStart - $timeEnd";
+  }
+
   factory ClassModel.fromJson(Map<String, dynamic> json) {
     return ClassModel(
       classCode: json['class_code'] ?? '',
