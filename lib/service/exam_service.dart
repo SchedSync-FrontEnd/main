@@ -6,24 +6,19 @@ class ExamService {
   static const String apiHost = "474qnu0tnc.execute-api.ap-southeast-2.amazonaws.com";
   static const String stage = "test";
 
-  // Set to true if you want to use mock data during UI development
-  static const bool useFakeBackend = false;
-
-  /// Helper: Build the full API URI
   Uri _buildUri(String path, {Map<String, String>? query}) {
-    return Uri.https(apiHost, '/$stage$path', query);
+    return Uri.https(apiHost, "/$stage$path", query);
   }
 
-  /// Helper: Show alert dialog for errors
   void _showError(BuildContext context, String message) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: const Text("Error"),
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text("OK"),
           ),
         ],
@@ -31,7 +26,9 @@ class ExamService {
     );
   }
 
+  // ---------------------------------------------------------------------------
   // POST: Add Exam
+  // ---------------------------------------------------------------------------
   Future<bool> addExam({
     required BuildContext context,
     required String userId,
@@ -40,12 +37,6 @@ class ExamService {
     required String examDate,
     required String deadline,
   }) async {
-    
-    if (useFakeBackend) {
-      await Future.delayed(const Duration(seconds: 1));
-      return true;
-    }
-
     try {
       final uri = _buildUri("/Exam");
 
@@ -53,7 +44,7 @@ class ExamService {
         uri,
         headers: {
           "Content-Type": "application/json",
-          "user_id": userId,
+          "user-id": userId,
         },
         body: jsonEncode({
           "exam_title": title,
@@ -63,12 +54,9 @@ class ExamService {
         }),
       );
 
-      if (response.statusCode == 201) {
-        return true;
-      }
+      if (response.statusCode == 201) return true;
 
-      final body = jsonDecode(response.body);
-      _showError(context, body["error"] ?? "Something went wrong");
+      _showError(context, jsonDecode(response.body)["error"]);
       return false;
 
     } catch (e) {
@@ -77,36 +65,118 @@ class ExamService {
     }
   }
 
-  // GET: Fetch Exams by user_id
+  // ---------------------------------------------------------------------------
+  // GET Exams for user
+  // ---------------------------------------------------------------------------
   Future<List<dynamic>> getExams(String userId, BuildContext context) async {
-    if (useFakeBackend) {
-      return [
-        {
-          "exam_title": "Mock Exam",
-          "description": "Test description",
-          "exam_date": "2025-01-01",
-          "deadline": "2025-01-01T10:00",
-          "status": "pending",
-        }
-      ];
-    }
-
     try {
       final uri = _buildUri("/Exam", query: {"user_id": userId});
 
-      final response = await http.get(uri);
+      final response = await http.get(uri, headers: {
+        "user-id": userId,
+      });
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
 
-      final error = jsonDecode(response.body);
-      _showError(context, error["error"] ?? "Unable to load exams");
+      _showError(context, jsonDecode(response.body)["error"]);
       return [];
 
     } catch (e) {
       _showError(context, "Network error: $e");
       return [];
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // GET SINGLE Exam by ID  (Useful for Edit Screen)
+  // ---------------------------------------------------------------------------
+  Future<Map<String, dynamic>?> getExamById(
+      String examId, String userId, BuildContext context) async {
+
+    final uri = _buildUri("/Exam", query: {
+      "exam_id": examId,
+    });
+
+    final response = await http.get(
+      uri,
+      headers: {"user-id": userId},
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+
+    _showError(context, jsonDecode(response.body)["error"]);
+    return null;
+  }
+
+  // ---------------------------------------------------------------------------
+// PUT: Update Exam
+// ---------------------------------------------------------------------------
+Future<bool> updateExam({
+  required String userId,
+  required Map<String, dynamic> updateBody,
+}) async {
+
+  if (!updateBody.containsKey("exam_id")) {
+    print("❌ ERROR: updateBody missing exam_id");
+    return false;
+  }
+
+  final examId = updateBody["exam_id"];
+
+  final uri = _buildUri(
+    "/Exam",
+    query: {"exam_id": examId},
+  );
+
+  try {
+    final response = await http.put(
+      uri,
+      headers: {
+        "Content-Type": "application/json",
+        "user-id": userId,
+      },
+      body: jsonEncode(updateBody),
+    );
+
+    print("⬆️ UPDATE BODY: $updateBody");
+    print("📡 STATUS: ${response.statusCode}");
+    print("📨 RESPONSE: ${response.body}");
+
+    return response.statusCode == 200;
+
+  } catch (e) {
+    print("❌ UPDATE ERROR: $e");
+    return false;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+  // ---------------------------------------------------------------------------
+  // DELETE Exam
+  // ---------------------------------------------------------------------------
+  Future<bool> deleteExam({
+    required String examId,
+    required String userId,
+  }) async {
+    final uri = _buildUri("/Exam", query: {"exam_id": examId});
+
+    final response = await http.delete(
+      uri,
+      headers: {"user-id": userId},
+    );
+
+    return response.statusCode == 200;
   }
 }

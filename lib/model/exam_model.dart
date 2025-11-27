@@ -1,21 +1,22 @@
 class ExamModel {
   final String examId;
   final String userId;
-  final String classId;   // REQUIRED
+  final String classId;
   final String examTitle;
   final String description;
-  final String examDate;
-  final String deadline;
+
+  /// Unified date + time field
+  final String examDatetime;
+
   final String status;
 
   ExamModel({
     required this.examId,
     required this.userId,
-    required this.classId,     // REQUIRED
+    required this.classId,
     required this.examTitle,
     required this.description,
-    required this.examDate,
-    required this.deadline,
+    required this.examDatetime,
     required this.status,
   });
 
@@ -23,11 +24,16 @@ class ExamModel {
     return ExamModel(
       examId: json['exam_id'] ?? '',
       userId: json['user_id'] ?? '',
-      classId: json['class_id'] ?? '',   // REQUIRED
+      classId: json['class_id'] ?? '',
       examTitle: json['exam_title'] ?? '',
       description: json['description'] ?? '',
-      examDate: json['exam_date'] ?? '',
-      deadline: json['deadline'] ?? '',
+
+      /// Supports both new & old fields for safety  
+      examDatetime: json['exam_datetime']
+          ?? json['deadline']     // fallback (old data)
+          ?? json['exam_date']    // fallback (old data)
+          ?? '',
+
       status: json['status'] ?? '',
     );
   }
@@ -36,11 +42,10 @@ class ExamModel {
     return {
       'exam_id': examId,
       'user_id': userId,
-      'class_id': classId,  // REQUIRED
+      'class_id': classId,
       'exam_title': examTitle,
       'description': description,
-      'exam_date': examDate,
-      'deadline': deadline,
+      'exam_datetime': examDatetime,
       'status': status,
     };
   }
